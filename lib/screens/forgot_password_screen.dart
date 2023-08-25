@@ -3,6 +3,7 @@ import 'package:test_commerce/ext/validation.dart';
 
 import '../styles/colors.dart';
 import '../widgets/input_text_field.dart';
+import 'otp_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -16,12 +17,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   String errorAccount = "";
 
   void accountValidation() {
+    FocusManager.instance.primaryFocus?.unfocus();
     var validation = account.text.validateAccount;
+    var numeric = account.text.isNumeric;
     setState(() {
-      errorAccount = validation.isEmpty
+      errorAccount = validation.isEmpty && !numeric
           ? "Sorry, we could not find your account"
           : validation;
     });
+    if (validation.isEmpty && numeric) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => OtpScreen(account: account.text)));
+    }
   }
 
   @override

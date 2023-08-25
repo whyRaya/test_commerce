@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_commerce/ext/validation.dart';
+import 'package:test_commerce/screens/otp_screen.dart';
 
 import '../styles/colors.dart';
 import '../widgets/input_text_field.dart';
@@ -36,6 +37,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         confirmValidation.isNotEmpty) {
       return;
     }
+
+    navigate(OtpScreen(account: account.text));
+  }
+
+  void navigate(Widget screen) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override

@@ -38,6 +38,7 @@ dependencies:
   package_info_plus: ^4.1.0
   flutter_svg: ^2.0.7
   email_validator: ^2.1.17
+  flutter_otp_text_field: ^1.1.1
 
 dev_dependencies:
   flutter_test:
