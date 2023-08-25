@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_commerce/screens/login_screen.dart';
 import 'package:test_commerce/styles/colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -8,34 +9,34 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with
-    SingleTickerProviderStateMixin {
-
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> opacity;
 
   @override
   void initState() {
     super.initState();
-    var duration = 1200;
+    var duration = 2000;
     controller = AnimationController(
-        duration: Duration(milliseconds: duration),
-        vsync: this
-    );
+        duration: Duration(milliseconds: duration), vsync: this);
     // .. cascade notation
-    opacity = Tween<double>(begin: 1.0, end: 0.0)
-        .animate(controller)..addListener(() {
-          setState(() {});
-    });
+    opacity = Tween<double>(begin: 1.0, end: 0.0).animate(controller)
+      ..addListener(() {
+        setState(() {});
+      });
     TickerFuture tickerFuture = controller.repeat();
-    tickerFuture.timeout(Duration(milliseconds: duration * 2), onTimeout: () {
+    tickerFuture.timeout(Duration(milliseconds: duration * 1), onTimeout: () {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()));
       controller.forward(from: 1).then((value) => () {
 
-      });
-      controller.stop(canceled: true);
+          });
+      //controller.stop(canceled: true);
     });
-
   }
+
+
 
   @override
   void dispose() {
@@ -49,10 +50,19 @@ class _SplashScreenState extends State<SplashScreen> with
       decoration: const BoxDecoration(color: transparentPrimary),
       child: SafeArea(
         child: Scaffold(
-          body: Column(
+          body: Stack(children: <Widget>[
+            Container(
+              decoration: const BoxDecoration(
+                color: transparentPrimary,
+              ),
+            ),
+            Column(
             children: [
-              Expanded(child: Opacity(opacity: opacity.value, child: Image.asset('assets/flutter_logo.png')))
-            ],
+              Expanded(
+                  child: Opacity(
+                      opacity: opacity.value,
+                      child: Image.asset('assets/flutter_logo.png')))
+            ])],
           ),
         ),
       ),
