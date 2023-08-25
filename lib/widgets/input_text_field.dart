@@ -6,12 +6,14 @@ class InputTextField extends StatefulWidget {
       required this.controller,
       this.isPasswordField = false,
       this.label = "",
-      this.hint = ""});
+      this.hint = "",
+      this.error = ""});
 
   final TextEditingController controller;
   final bool isPasswordField;
   final String label;
   final String hint;
+  final String error;
 
   @override
   State<InputTextField> createState() => _InputTextFieldState();
@@ -36,6 +38,7 @@ class _InputTextFieldState extends State<InputTextField> {
         hintText: widget.hint,
         labelText: widget.label,
         helperText: "",
+        errorText: widget.error.isEmpty ? null : widget.error,
         helperStyle: const TextStyle(color: Colors.green),
         suffixIcon: !widget.isPasswordField? null : IconButton(
           icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),

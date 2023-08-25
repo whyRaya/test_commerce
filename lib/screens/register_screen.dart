@@ -1,56 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:test_commerce/ext/validation.dart';
-import 'package:test_commerce/screens/forgot_password_screen.dart';
-import 'package:test_commerce/screens/register_screen.dart';
-import 'package:test_commerce/styles/colors.dart';
-import 'package:test_commerce/widgets/input_text_field.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+import '../styles/colors.dart';
+import '../widgets/input_text_field.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key, required this.versionNumber});
+
+  final String versionNumber;
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController account = TextEditingController(text: "");
   TextEditingController password = TextEditingController(text: "");
-  bool passwordVisible = true;
-  String appVersion = "";
+  TextEditingController rePassword = TextEditingController(text: "");
   String accountError = "";
   String passwordError = "";
+  String rePasswordError = "";
 
-  @override
-  void initState() {
-    super.initState();
-    setAppVersion();
-  }
-
-  Future<void> setAppVersion() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    String version = packageInfo.version;
-    setState(() {
-      appVersion = "v.$version";
-    });
-  }
-
-  void loginValidation() {
+  void registerValidation() {
     var accountValidation = account.text.validateAccount;
     var passwordValidation = password.text.isPasswordValid;
+    var confirmValidation = rePassword.text.isPasswordConfirmed(password.text);
     setState(() {
       accountError = accountValidation;
       passwordError = passwordValidation;
+      rePasswordError =
+      passwordValidation.isNotEmpty ? "" : confirmValidation;
     });
-    if (accountValidation.isNotEmpty || passwordValidation.isNotEmpty) {
+    if (accountValidation.isNotEmpty ||
+        passwordValidation.isNotEmpty ||
+        confirmValidation.isNotEmpty) {
       return;
     }
-  }
-
-  void navigate(Widget screen) {
-    FocusManager.instance.primaryFocus?.unfocus();
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
@@ -59,17 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
         padding:
             EdgeInsets.only(right: 56.0, bottom: 10.0, top: 56.0, left: 16.0),
         child: Text(
-          'Login to your Account',
+          'Register & Join Us Today',
           style: TextStyle(
               color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
         ));
 
-    Widget loginButton = Positioned(
+    Widget registerButton = Positioned(
       left: MediaQuery.of(context).size.width / 2.1,
       bottom: 10,
       child: InkWell(
         onTap: () {
-          loginValidation();
+          registerValidation();
         },
         child: Container(
           width: MediaQuery.of(context).size.width / 2,
@@ -85,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
               borderRadius: BorderRadius.circular(8.0)),
           child: const Center(
-              child: Text("Log In",
+              child: Text("Register",
                   style: TextStyle(
                       color: Color(0xfffefefe),
                       fontWeight: FontWeight.w600,
@@ -95,12 +80,12 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
-    Widget loginForm = SizedBox(
-      height: 285,
+    Widget registerForm = SizedBox(
+      height: 375,
       child: Stack(
         children: <Widget>[
           Container(
-            height: 245,
+            height: 340,
             width: MediaQuery.of(context).size.width,
             padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
             decoration: const BoxDecoration(
@@ -113,85 +98,45 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: InputTextField(
-                        controller: account,
-                        label: "Phone or Email",
-                        hint: "800551234 or abc@gmail.com", error: accountError,)),
+                      controller: account,
+                      label: "Phone or Email",
+                      hint: "800551234 or abc@gmail.com",
+                      error: accountError,
+                    )),
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: InputTextField(
-                      controller: password,
-                      isPasswordField: true,
-                      label: "Password", error: passwordError,),
+                    controller: password,
+                    isPasswordField: true,
+                    label: "Password",
+                    hint: "Must have at least 8 characters",
+                    error: passwordError,
+                  ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 4.0, top: 10.0),
-                  child: InkWell(
-                    onTap: () {
-                      navigate(const ForgotPasswordScreen());
-                    },
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: Color.fromRGBO(225, 95, 40, 1.0),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                      ),
-                    ),
-                  ),
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: InputTextField(
+                      controller: rePassword,
+                      isPasswordField: true,
+                      label: "Confirm Password",
+                      hint: "Retype your password",
+                      error: rePasswordError),
                 ),
               ],
             ),
           ),
-          loginButton
+          registerButton
         ],
       ),
     );
 
-    Widget separator = Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-      child: Row(
-        children: [
-          Expanded(child: Container(height: 1, color: Colors.white)),
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              "OR",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: Container(height: 1, color: Colors.white))
-        ],
-      ),
-    );
-
-    Widget loginWithGoogle = Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56.0,
-        child: ElevatedButton.icon(
-          onPressed: () {},
-          icon: SvgPicture.asset(
-            'assets/google.svg',
-            semanticsLabel: 'Google icon',
-            height: 24,
-            width: 24,
-          ),
-          label: const Text('Login with Google'), // <-- Text
-        ),
-      ),
-    );
-
-    Widget signUp = Padding(
+    Widget backToLogin = Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           const Text(
-            "Don't have an account? ",
+            "Have an account? ",
             style: TextStyle(
               fontStyle: FontStyle.italic,
               color: Color.fromRGBO(255, 255, 255, 0.8),
@@ -200,10 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           InkWell(
             onTap: () {
-              navigate(RegisterScreen(versionNumber: appVersion));
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.of(context).pop();
             },
             child: const Text(
-              'Sign up',
+              'Back to Login',
               style: TextStyle(
                 color: Color.fromRGBO(255, 255, 255, 1.0),
                 fontWeight: FontWeight.bold,
@@ -222,8 +168,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            signUp,
-            Text(appVersion,
+            backToLogin,
+            Text(widget.versionNumber,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -233,7 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-
     return Scaffold(
         body: Stack(children: <Widget>[
       Container(
@@ -257,9 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 title,
                 Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: loginForm),
-                separator,
-                loginWithGoogle,
+                    child: registerForm),
                 const Spacer(),
                 footer
               ],
