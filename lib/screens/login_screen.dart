@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:test_commerce/ext/validation.dart';
 import 'package:test_commerce/screens/forgot_password_screen.dart';
+import 'package:test_commerce/screens/main_screen.dart';
 import 'package:test_commerce/screens/register_screen.dart';
 import 'package:test_commerce/styles/colors.dart';
 import 'package:test_commerce/widgets/input_text_field.dart';
@@ -43,8 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
       accountError = accountValidation;
       passwordError = passwordValidation;
     });
-    if (accountValidation.isNotEmpty || passwordValidation.isNotEmpty) {
-      return;
+    if (accountValidation.isEmpty && passwordValidation.isEmpty) {
+      navigate(const MainScreen());
     }
   }
 
@@ -113,15 +114,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: InputTextField(
-                        controller: account,
-                        label: "Phone or Email",
-                        hint: "800551234 or abc@gmail.com", error: accountError,)),
+                      controller: account,
+                      label: "Phone or Email",
+                      hint: "800551234 or abc@gmail.com",
+                      error: accountError,
+                    )),
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: InputTextField(
-                      controller: password,
-                      isPasswordField: true,
-                      label: "Password", error: passwordError,),
+                    controller: password,
+                    isPasswordField: true,
+                    label: "Password",
+                    error: passwordError,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4.0, top: 10.0),

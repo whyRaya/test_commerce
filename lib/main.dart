@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_commerce/screens/main/home_screen.dart';
 import 'package:test_commerce/screens/splash_screen.dart';
 import 'package:test_commerce/styles/colors.dart';
 
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: primary),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const HomeScreen(),
     );
   }
 }

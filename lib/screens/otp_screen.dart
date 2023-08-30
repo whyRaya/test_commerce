@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:test_commerce/ext/validation.dart';
 import 'package:test_commerce/screens/login_screen.dart';
+import 'package:test_commerce/screens/main_screen.dart';
 
 import '../styles/colors.dart';
 
@@ -55,7 +56,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void validateOtp() {
     if (otpCode.length == 5) {
-      // nice
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainScreen()));
     } else {
       var message =
           otpCode.isEmpty ? "Please enter OTP code" : "Wrong OTP Code";
