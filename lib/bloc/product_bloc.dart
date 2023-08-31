@@ -10,17 +10,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         super(UninitializedState()) {
     on<GetProductEvent>(onGetHomeProduct);
   }
-  //
-  // void onGetProduct(GetProductEvent event, Emitter<ProductState> emit) async {
-  //   emit(LoadingState());
-  //   await _productRepository
-  //       .getProduct()
-  //       .then((product) => {emit(SuccessState(product))})
-  //       .catchError((error, stackTrace) {
-  //     emit(ErrorState(error));
-  //     Future.error(error);
-  //   });
-  // }
 
   void onGetHomeProduct(
       GetProductEvent event, Emitter<ProductState> emit) async {
