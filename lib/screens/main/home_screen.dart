@@ -2,6 +2,7 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_commerce/bloc/product_bloc.dart';
+import 'package:test_commerce/ext/strings.dart';
 import 'package:test_commerce/styles/colors.dart';
 
 import '../../bloc/product_event.dart';
@@ -49,20 +50,11 @@ class _HomeScreenState extends State<HomeScreen>
                     MainHeader(
                       products: state.data.products,
                     ),
-                    const SizedBox(height: 20,),
-                    TabBar(
-                      tabs: state.data.categories
-                          .map((e) => Tab(text: e))
-                          .toList(),
-                      labelStyle: const TextStyle(fontSize: 16.0),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 14.0,
-                      ),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: const Color.fromRGBO(0, 0, 0, 0.5),
-                      isScrollable: true,
-                      controller: tabController,
-                    )
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const _Balance(),
+                    _MainTabBar(categories: state.data.categories,),
                   ],
                 ),
               );
@@ -221,3 +213,181 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
+
+class _Balance extends StatelessWidget {
+  const _Balance();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              InkWell(
+                child: const Icon(Icons.qr_code_scanner),
+                onTap: () {},
+              ),
+              const SizedBox(
+                width: 1.0,
+                height: 24.0,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(158,158, 158, 0.6)
+                  ),
+                ),
+              ),
+              InkWell(
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.wallet,
+                      color: primary,
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('\$ 50000', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text(
+                          '1500 points',
+                          style: TextStyle(fontSize: 12),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                onTap: () {},
+              ),
+              const SizedBox(
+                width: 1.0,
+                height: 24.0,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(158,158, 158, 0.6)
+                  ),
+                ),
+              ),
+              InkWell(
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.loyalty,
+                      color: accent,
+                    ),
+                    SizedBox(
+                      width: 6,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Platinum", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        Text(
+                          '12 Coupons',
+                          style: TextStyle(fontSize: 12),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MainTabBar extends StatefulWidget {
+  const _MainTabBar({required this.categories});
+
+  final List<String> categories;
+
+  @override
+  State<_MainTabBar> createState() => _MainTabBarState();
+}
+
+class _MainTabBarState extends State<_MainTabBar> with SingleTickerProviderStateMixin {
+
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TabBar(
+          tabs: widget.categories
+              .map((e) => Tab(text: e.capitalizeFirstWord()))
+              .toList(),
+          labelStyle: const TextStyle(fontSize: 16.0),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14.0,
+          ),
+          labelColor: Colors.white,
+          unselectedLabelColor: const Color.fromRGBO(0, 0, 0, 0.5),
+          isScrollable: true,
+          controller: _tabController,
+        ),
+        SizedBox(
+          width: double.infinity,
+          height: 200,
+          child: TabBarView(controller: _tabController, children: widget.categories
+                .map((e) => Center(child: Text(e.capitalizeFirstWord())))
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ProductCategoriesView extends StatefulWidget {
+  const ProductCategoriesView({super.key});
+
+  @override
+  State<ProductCategoriesView> createState() => _ProductCategoriesViewState();
+}
+
+class _ProductCategoriesViewState extends State<ProductCategoriesView> {
+  @override
+  Widget build(BuildContext context) {
+    return GridView(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+      ),
+      children: [
+        Image.network('https://picsum.photos/250?image=1'),
+        Image.network('https://picsum.photos/250?image=2'),
+        Image.network('https://picsum.photos/250?image=3'),
+        Image.network('https://picsum.photos/250?image=4'),
+      ],
+    );
+  }
+}
+
+
+
