@@ -22,6 +22,15 @@ class SuccessState extends ProductState {
   List<Object> get props => [data];
 }
 
+class LoadTabSuccessState extends ProductState {
+  LoadTabSuccessState(this.data);
+
+  final List<ProductModel> data;
+
+  @override
+  List<Object> get props => [data];
+}
+
 class ErrorState extends ProductState {
   ErrorState(this.error);
 

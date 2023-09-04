@@ -44,20 +44,30 @@ class _HomeScreenState extends State<HomeScreen>
               return Center(child: Text("${state.error}"));
             } else if (state is SuccessState) {
               return SafeArea(
-                child: Column(
-                  children: [
-                    const MainAppBar(),
-                    MainHeader(
-                      products: state.data.products,
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const _Balance(),
-                    _MainTabBar(categories: state.data.categories,),
-                  ],
+                  child: NestedScrollView(
+                physics: NeverScrollableScrollPhysics(),
+                headerSliverBuilder:
+                    (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    SliverToBoxAdapter(
+                        child: Column(
+                      children: [
+                        const MainAppBar(),
+                        MainHeader(
+                          products: state.data.products,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 16.0),
+                          child: _Balance(),
+                        ),
+                      ],
+                    ))
+                  ];
+                },
+                body: _MainTabBar(
+                  categories: state.data.categories,
                 ),
-              );
+              ));
             } else {
               return const Center(child: Text("Default"));
             }
@@ -102,7 +112,7 @@ class MainHeader extends StatelessWidget {
       child: Swiper(
         itemCount: products.length,
         itemBuilder: (_, index) {
-          return ProductCard(
+          return MainProductCard(
               height: cardHeight, width: cardWidth, product: products[index]);
         },
         scale: 0.8,
@@ -118,8 +128,8 @@ class MainHeader extends StatelessWidget {
   }
 }
 
-class ProductCard extends StatelessWidget {
-  const ProductCard({
+class MainProductCard extends StatelessWidget {
+  const MainProductCard({
     super.key,
     required this.product,
     required this.height,
@@ -236,9 +246,8 @@ class _Balance extends StatelessWidget {
                 width: 1.0,
                 height: 24.0,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(158,158, 158, 0.6)
-                  ),
+                  decoration:
+                      BoxDecoration(color: Color.fromRGBO(158, 158, 158, 0.6)),
                 ),
               ),
               InkWell(
@@ -256,7 +265,9 @@ class _Balance extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('\$ 50000', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text('\$ 50000',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                         Text(
                           '1500 points',
                           style: TextStyle(fontSize: 12),
@@ -271,9 +282,8 @@ class _Balance extends StatelessWidget {
                 width: 1.0,
                 height: 24.0,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(158,158, 158, 0.6)
-                  ),
+                  decoration:
+                      BoxDecoration(color: Color.fromRGBO(158, 158, 158, 0.6)),
                 ),
               ),
               InkWell(
@@ -291,7 +301,11 @@ class _Balance extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Platinum", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        Text(
+                          "Platinum",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                         Text(
                           '12 Coupons',
                           style: TextStyle(fontSize: 12),
@@ -319,14 +333,14 @@ class _MainTabBar extends StatefulWidget {
   State<_MainTabBar> createState() => _MainTabBarState();
 }
 
-class _MainTabBarState extends State<_MainTabBar> with SingleTickerProviderStateMixin {
-
+class _MainTabBarState extends State<_MainTabBar>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: widget.categories.length, vsync: this);
   }
 
   @override
@@ -343,6 +357,7 @@ class _MainTabBarState extends State<_MainTabBar> with SingleTickerProviderState
           tabs: widget.categories
               .map((e) => Tab(text: e.capitalizeFirstWord()))
               .toList(),
+          onTap: (tabIndex) {},
           labelStyle: const TextStyle(fontSize: 16.0),
           unselectedLabelStyle: const TextStyle(
             fontSize: 14.0,
@@ -352,11 +367,11 @@ class _MainTabBarState extends State<_MainTabBar> with SingleTickerProviderState
           isScrollable: true,
           controller: _tabController,
         ),
-        SizedBox(
-          width: double.infinity,
-          height: 200,
-          child: TabBarView(controller: _tabController, children: widget.categories
-                .map((e) => Center(child: Text(e.capitalizeFirstWord())))
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: widget.categories
+                .map((e) => ProductCategoriesView(category: e))
                 .toList(),
           ),
         ),
@@ -366,7 +381,9 @@ class _MainTabBarState extends State<_MainTabBar> with SingleTickerProviderState
 }
 
 class ProductCategoriesView extends StatefulWidget {
-  const ProductCategoriesView({super.key});
+  const ProductCategoriesView({super.key, required this.category});
+
+  final String category;
 
   @override
   State<ProductCategoriesView> createState() => _ProductCategoriesViewState();
@@ -375,19 +392,136 @@ class ProductCategoriesView extends StatefulWidget {
 class _ProductCategoriesViewState extends State<ProductCategoriesView> {
   @override
   Widget build(BuildContext context) {
-    return GridView(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+    double cardHeight = MediaQuery.of(context).size.height * 0.5;
+    double cardWidth = MediaQuery.of(context).size.width * 0.4;
+    return BlocProvider(
+      create: (context) =>
+          ProductCategoriesBloc(productRepository: ProductRepository())
+            ..add(GetProductCategoriesEvent(category: widget.category)),
+      child: Scaffold(
+        backgroundColor: primary,
+        body: BlocBuilder<ProductCategoriesBloc, ProductState>(
+          builder: (event, state) {
+            if (state is LoadingState) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is ErrorState) {
+              return Center(child: Text("${state.error}"));
+            } else if (state is LoadTabSuccessState) {
+              return GridView(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                ),
+                children: state.data
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ProductCard(
+                              product: e, height: cardHeight, width: cardWidth),
+                        ))
+                    .toList(),
+              );
+            } else {
+              return const Center(child: Text("Default"));
+            }
+          },
+        ),
       ),
-      children: [
-        Image.network('https://picsum.photos/250?image=1'),
-        Image.network('https://picsum.photos/250?image=2'),
-        Image.network('https://picsum.photos/250?image=3'),
-        Image.network('https://picsum.photos/250?image=4'),
-      ],
     );
   }
 }
 
+class ProductCard extends StatelessWidget {
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.height,
+    required this.width,
+  });
 
+  final ProductModel product;
+  final double height;
+  final double width;
 
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {},
+      child: Stack(
+        children: <Widget>[
+          Container(
+            height: height,
+            width: width,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+              color: Colors.white,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: () {},
+                  color: Colors.black54,
+                ),
+                Column(
+                  children: <Widget>[
+                    Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 5),
+                          child: Text(
+                            product.title.trim(),
+                            style: const TextStyle(
+                                color: Colors.black54, fontSize: 14.0),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
+                        )),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 5.0),
+                        padding: const EdgeInsets.fromLTRB(8.0, 4.0, 12.0, 4.0),
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              bottomLeft: Radius.circular(10)),
+                          color: accent,
+                        ),
+                        child: Text(
+                          '\$${product.price}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          Positioned(
+            top: 10,
+            left: 50,
+            child: Hero(
+              tag: product.image,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  product.image,
+                  height: height * 0.225,
+                  width: width * 0.35,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

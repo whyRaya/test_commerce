@@ -17,8 +17,16 @@ class ProductServices {
   }
 
   Future<List<ProductModel>> getProduct(int limit) async {
+    return await _getProducts("$_baseUrl/products?limit=$limit");
+  }
+
+  Future<List<ProductModel>> getProductByCategory(String category) async {
+    return await _getProducts("$_baseUrl/products/category/$category");
+  }
+
+  Future<List<ProductModel>> _getProducts(String url) async {
     try {
-      final body = await _manageResponse("$_baseUrl/products?limit=$limit");
+      final body = await _manageResponse(url);
       List<dynamic> list = json.decode(body);
       return list.map((e) => ProductModel.fromJson(e)).toList();
     } catch (error) {

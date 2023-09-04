@@ -7,8 +7,12 @@ class ProductEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class GetHomeProductEvent extends ProductEvent {
+class GetProductCategoriesEvent extends ProductEvent {
+  const GetProductCategoriesEvent({required this.category});
+  final String category;
 
+  @override
+  List<Object?> get props => [category];
 }
 
 class GetProductEvent extends ProductEvent {

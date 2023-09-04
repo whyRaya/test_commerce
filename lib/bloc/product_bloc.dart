@@ -34,3 +34,26 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   final ProductRepository _productRepository;
 }
+
+class ProductCategoriesBloc extends Bloc<ProductEvent, ProductState> {
+  ProductCategoriesBloc({required ProductRepository productRepository})
+      : _productRepository = productRepository,
+        super(UninitializedState()) {
+    on<GetProductCategoriesEvent>(onGetProductByCategory);
+  }
+
+  void onGetProductByCategory(
+      GetProductCategoriesEvent event, Emitter<ProductState> emit) async {
+    emit(LoadingState());
+    await _productRepository.getProductByCategory(event.category).then(
+          (value) => {
+        emit(LoadTabSuccessState(value))
+      },
+    ).catchError((error, stackTrace) {
+      emit(ErrorState(error));
+      Future.error(error);
+    });
+  }
+
+  final ProductRepository _productRepository;
+}
