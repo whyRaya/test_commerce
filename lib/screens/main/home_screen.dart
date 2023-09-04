@@ -30,12 +30,13 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ProductBloc(productRepository: ProductRepository())
+      create: (BuildContext context) => ProductBloc(productRepository: ProductRepository())
         ..add(GetProductEvent()),
       child: Scaffold(
         backgroundColor: primary,
         body: BlocBuilder<ProductBloc, CommonState>(
-          builder: (_, state) {
+          builder: (context, state) {
+            final bloc = BlocProvider.of<ProductBloc>(context);
             if (state is LoadingState) {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -44,30 +45,39 @@ class _HomeScreenState extends State<HomeScreen>
               return Center(child: Text("${state.error}"));
             } else if (state is SuccessState) {
               return SafeArea(
-                  child: NestedScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                headerSliverBuilder:
-                    (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    SliverToBoxAdapter(
-                        child: Column(
-                      children: [
-                        const _MainAppBar(),
-                        _MainHeader(
-                          products: state.data.products,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 16.0),
-                          child: _MainBalance(),
-                        ),
-                      ],
-                    ))
-                  ];
-                },
-                body: _MainCategoryTabBar(
-                  categories: state.data.categories,
-                ),
-              ));
+                child: RefreshIndicator(
+                    notificationPredicate: (notification) {
+                      // with NestedScrollView local(depth == 2) OverscrollNotification are not sent
+                      return notification.depth == 2;
+                    },
+                    onRefresh: () async {
+                      bloc.add(GetProductEvent());
+                    },
+                    child: NestedScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return <Widget>[
+                          SliverToBoxAdapter(
+                              child: Column(
+                            children: [
+                              const _MainAppBar(),
+                              _MainHeader(
+                                products: state.data.products,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 16.0),
+                                child: _MainBalance(),
+                              ),
+                            ],
+                          ))
+                        ];
+                      },
+                      body: _MainCategoryTabBar(
+                        categories: state.data.categories,
+                      ),
+                    )),
+              );
             } else {
               return const Center(child: Text("Default"));
             }
@@ -339,7 +349,8 @@ class _MainCategoryTabBarState extends State<_MainCategoryTabBar>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.categories.length, vsync: this);
+    _tabController =
+        TabController(length: widget.categories.length, vsync: this);
   }
 
   @override
