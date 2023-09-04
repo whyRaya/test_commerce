@@ -1,37 +1,27 @@
 import 'package:equatable/equatable.dart';
-import 'package:test_commerce/data/model/product_model.dart';
 
-abstract class ProductState extends Equatable {}
+abstract class CommonState<T> extends Equatable {}
 
-class UninitializedState extends ProductState {
+class UninitializedState extends CommonState {
   @override
   List<Object?> get props => [];
 }
 
-class LoadingState extends ProductState {
+class LoadingState extends CommonState {
   @override
   List<Object> get props => [];
 }
 
-class SuccessState extends ProductState {
+class SuccessState<T> extends CommonState<T> {
   SuccessState(this.data);
 
-  final ProductCategoriesModel data;
+  final T data;
 
   @override
-  List<Object> get props => [data];
+  List<T> get props => [data];
 }
 
-class LoadTabSuccessState extends ProductState {
-  LoadTabSuccessState(this.data);
-
-  final List<ProductModel> data;
-
-  @override
-  List<Object> get props => [data];
-}
-
-class ErrorState extends ProductState {
+class ErrorState extends CommonState {
   ErrorState(this.error);
 
   final Error error;

@@ -4,7 +4,7 @@ import 'package:test_commerce/bloc/product_state.dart';
 import 'package:test_commerce/data/model/product_model.dart';
 import 'package:test_commerce/data/product_repository.dart';
 
-class ProductBloc extends Bloc<ProductEvent, ProductState> {
+class ProductBloc extends Bloc<ProductEvent, CommonState> {
   ProductBloc({required ProductRepository productRepository})
       : _productRepository = productRepository,
         super(UninitializedState()) {
@@ -12,14 +12,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   void onGetHomeProduct(
-      GetProductEvent event, Emitter<ProductState> emit) async {
+      GetProductEvent event, Emitter<CommonState> emit) async {
     emit(LoadingState());
     await Future.wait([
       _productRepository.getCategories(),
       _productRepository.getProduct()
     ]).then(
       (value) => {
-        emit(SuccessState(
+        emit(SuccessState<ProductCategoriesModel>(
           ProductCategoriesModel(
             categories: value.first as List<String>,
             products: value.last as List<ProductModel>,
@@ -28,30 +28,30 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       },
     ).catchError((error, stackTrace) {
       emit(ErrorState(error));
-      Future.error(error);
+      return <void>{};
     });
   }
 
   final ProductRepository _productRepository;
 }
 
-class ProductCategoriesBloc extends Bloc<ProductEvent, ProductState> {
+class ProductCategoriesBloc extends Bloc<ProductEvent, CommonState> {
   ProductCategoriesBloc({required ProductRepository productRepository})
       : _productRepository = productRepository,
         super(UninitializedState()) {
-    on<GetProductCategoriesEvent>(onGetProductByCategory);
+    on<GetProductByCategoriesEvent>(onGetProductByCategory);
   }
 
   void onGetProductByCategory(
-      GetProductCategoriesEvent event, Emitter<ProductState> emit) async {
+      GetProductByCategoriesEvent event, Emitter<CommonState> emit) async {
     emit(LoadingState());
     await _productRepository.getProductByCategory(event.category).then(
           (value) => {
-        emit(LoadTabSuccessState(value))
+        emit(SuccessState(value))
       },
     ).catchError((error, stackTrace) {
       emit(ErrorState(error));
-      Future.error(error);
+      throw Exception('An error occurred during data fetching: $error');
     });
   }
 

@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen>
         ..add(GetProductEvent()),
       child: Scaffold(
         backgroundColor: primary,
-        body: BlocBuilder<ProductBloc, ProductState>(
+        body: BlocBuilder<ProductBloc, CommonState>(
           builder: (_, state) {
             if (state is LoadingState) {
               return const Center(
@@ -45,26 +45,26 @@ class _HomeScreenState extends State<HomeScreen>
             } else if (state is SuccessState) {
               return SafeArea(
                   child: NestedScrollView(
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
                     SliverToBoxAdapter(
                         child: Column(
                       children: [
-                        const MainAppBar(),
-                        MainHeader(
+                        const _MainAppBar(),
+                        _MainHeader(
                           products: state.data.products,
                         ),
                         const Padding(
                           padding: EdgeInsets.only(top: 16.0),
-                          child: _Balance(),
+                          child: _MainBalance(),
                         ),
                       ],
                     ))
                   ];
                 },
-                body: _MainTabBar(
+                body: _MainCategoryTabBar(
                   categories: state.data.categories,
                 ),
               ));
@@ -78,8 +78,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-class MainAppBar extends StatelessWidget {
-  const MainAppBar({super.key});
+class _MainAppBar extends StatelessWidget {
+  const _MainAppBar();
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +96,8 @@ class MainAppBar extends StatelessWidget {
   }
 }
 
-class MainHeader extends StatelessWidget {
-  MainHeader({super.key, required this.products});
+class _MainHeader extends StatelessWidget {
+  _MainHeader({required this.products});
 
   final List<ProductModel> products;
   final SwiperController swiperController = SwiperController();
@@ -112,7 +112,7 @@ class MainHeader extends StatelessWidget {
       child: Swiper(
         itemCount: products.length,
         itemBuilder: (_, index) {
-          return MainProductCard(
+          return _MainProductHeader(
               height: cardHeight, width: cardWidth, product: products[index]);
         },
         scale: 0.8,
@@ -128,9 +128,8 @@ class MainHeader extends StatelessWidget {
   }
 }
 
-class MainProductCard extends StatelessWidget {
-  const MainProductCard({
-    super.key,
+class _MainProductHeader extends StatelessWidget {
+  const _MainProductHeader({
     required this.product,
     required this.height,
     required this.width,
@@ -224,8 +223,8 @@ class MainProductCard extends StatelessWidget {
   }
 }
 
-class _Balance extends StatelessWidget {
-  const _Balance();
+class _MainBalance extends StatelessWidget {
+  const _MainBalance();
 
   @override
   Widget build(BuildContext context) {
@@ -324,16 +323,16 @@ class _Balance extends StatelessWidget {
   }
 }
 
-class _MainTabBar extends StatefulWidget {
-  const _MainTabBar({required this.categories});
+class _MainCategoryTabBar extends StatefulWidget {
+  const _MainCategoryTabBar({required this.categories});
 
   final List<String> categories;
 
   @override
-  State<_MainTabBar> createState() => _MainTabBarState();
+  State<_MainCategoryTabBar> createState() => _MainCategoryTabBarState();
 }
 
-class _MainTabBarState extends State<_MainTabBar>
+class _MainCategoryTabBarState extends State<_MainCategoryTabBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -371,7 +370,7 @@ class _MainTabBarState extends State<_MainTabBar>
           child: TabBarView(
             controller: _tabController,
             children: widget.categories
-                .map((e) => ProductCategoriesView(category: e))
+                .map((e) => _MainCategoryTabView(category: e))
                 .toList(),
           ),
         ),
@@ -380,16 +379,16 @@ class _MainTabBarState extends State<_MainTabBar>
   }
 }
 
-class ProductCategoriesView extends StatefulWidget {
-  const ProductCategoriesView({super.key, required this.category});
+class _MainCategoryTabView extends StatefulWidget {
+  const _MainCategoryTabView({required this.category});
 
   final String category;
 
   @override
-  State<ProductCategoriesView> createState() => _ProductCategoriesViewState();
+  State<_MainCategoryTabView> createState() => _MainCategoryTabViewState();
 }
 
-class _ProductCategoriesViewState extends State<ProductCategoriesView> {
+class _MainCategoryTabViewState extends State<_MainCategoryTabView> {
   @override
   Widget build(BuildContext context) {
     double cardHeight = MediaQuery.of(context).size.height * 0.5;
@@ -397,10 +396,10 @@ class _ProductCategoriesViewState extends State<ProductCategoriesView> {
     return BlocProvider(
       create: (context) =>
           ProductCategoriesBloc(productRepository: ProductRepository())
-            ..add(GetProductCategoriesEvent(category: widget.category)),
+            ..add(GetProductByCategoriesEvent(category: widget.category)),
       child: Scaffold(
         backgroundColor: primary,
-        body: BlocBuilder<ProductCategoriesBloc, ProductState>(
+        body: BlocBuilder<ProductCategoriesBloc, CommonState>(
           builder: (event, state) {
             if (state is LoadingState) {
               return const Center(
@@ -408,15 +407,15 @@ class _ProductCategoriesViewState extends State<ProductCategoriesView> {
               );
             } else if (state is ErrorState) {
               return Center(child: Text("${state.error}"));
-            } else if (state is LoadTabSuccessState) {
+            } else if (state is SuccessState) {
               return GridView(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                 ),
                 children: state.data
-                    .map((e) => Padding(
+                    .map<Widget>((e) => Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: ProductCard(
+                          child: _MainCategoryProduct(
                               product: e, height: cardHeight, width: cardWidth),
                         ))
                     .toList(),
@@ -431,9 +430,8 @@ class _ProductCategoriesViewState extends State<ProductCategoriesView> {
   }
 }
 
-class ProductCard extends StatelessWidget {
-  const ProductCard({
-    super.key,
+class _MainCategoryProduct extends StatelessWidget {
+  const _MainCategoryProduct({
     required this.product,
     required this.height,
     required this.width,
